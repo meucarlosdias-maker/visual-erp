@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Visual ERP Mobile",
+    "slug": "visual-erp-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "visual-erp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#3b82f6"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.visualerp.mobile"
+    },
+    "android": {
+      "package": "com.visualerp.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#3b82f6"
+      }
+    },
+    "plugins": ["expo-router"]
+  }
+}

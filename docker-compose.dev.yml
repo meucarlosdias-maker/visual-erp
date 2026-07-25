@@ -1,0 +1,81 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: visual-erp-app-dev
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env.development
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:-password}@db:5432/visual-erp-dev
+      - DIRECT_URL=postgresql://postgres:${DB_PASSWORD:-password}@db:5432/visual-erp-dev
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./prisma:/app/prisma
+      - ./package.json:/app/package.json
+      - ./next.config.ts:/app/next.config.ts
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+    networks:
+      - visual-erp-network
+
+  db:
+    image: postgres:16-alpine
+    container_name: visual-erp-db-dev
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: visual-erp-dev
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+    networks:
+      - visual-erp-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: visual-erp-pgadmin
+    restart: unless-stopped
+    ports:
+      - '5050:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@visualerp.com.br}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - visual-erp-network
+
+volumes:
+  postgres-data:
+    name: visual-erp-postgres-data-dev
+  pgadmin-data:
+    name: visual-erp-pgadmin-data
+
+networks:
+  visual-erp-network:
+    name: visual-erp-network
+    driver: bridge

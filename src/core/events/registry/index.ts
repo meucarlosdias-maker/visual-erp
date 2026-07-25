@@ -1,0 +1,31 @@
+export const EVENT_DESCRIPTIONS: Record<string, string> = {
+  UserCreated: 'Usuário criado no sistema',
+  ClientCreated: 'Novo cliente cadastrado',
+  LeadConverted: 'Lead convertido em cliente',
+  QuoteApproved: 'Orçamento aprovado pelo cliente',
+  ProjectCreated: 'Projeto criado',
+  ProjectFinished: 'Projeto finalizado',
+  WorkOrderCreated: 'Ordem de serviço criada',
+  ProductionFinished: 'Produção finalizada',
+  InstallationFinished: 'Instalação concluída',
+  FinancialPaid: 'Conta paga',
+  FinancialReceived: 'Conta recebida',
+  WorkflowExecuted: 'Workflow executado',
+  AIExecutionFinished: 'Execução de IA finalizada',
+};
+
+export const EVENT_CATEGORIES: Record<string, string> = {
+  UserCreated: 'users',
+  ClientCreated: 'crm',
+  LeadConverted: 'crm',
+  QuoteApproved: 'commercial',
+  ProjectCreated: 'projects',
+  ProjectFinished: 'projects',
+  WorkOrderCreated: 'services',
+  ProductionFinished: 'production',
+  InstallationFinished: 'installation',
+  FinancialPaid: 'financial',
+  FinancialReceived: 'financial',
+  WorkflowExecuted: 'automation',
+  AIExecutionFinished: 'ai',
+};

@@ -1,0 +1,10 @@
+export type { AuditAction, AuditEntry, AccessLogEntry, SecurityPolicyDefinition, PolicyRule, ComplianceCheck, ComplianceCheckItem, ComplianceFramework, GovernanceApproval, RetentionPolicyDefinition } from './types';
+export { SecurityService, securityService } from './services';
+export { recordAudit, queryAudit, listAuditEvents } from './audit';
+export { checkCompliance, listFrameworks, getAllComplianceChecks } from './compliance';
+export { requestApproval, approve, reject, listApprovals } from './governance';
+export { createPolicy, updatePolicy, deletePolicy, getPolicy, listPolicies, evaluatePolicy } from './policies';
+export { encryptSensitive, decryptSensitive, maskSensitive, generateToken, obfuscateEmail } from './encryption';
+export { createRetentionPolicy, updateRetentionPolicy, deleteRetentionPolicy, getRetentionPolicy, listRetentionPolicies, getPolicyForEntity } from './retention';
+export { SECURITY_PERMISSIONS, hasSecurityPermission, hasAnySecurityPermission } from './permissions';
+export type { SecurityPermission } from './permissions';

@@ -1,0 +1,20 @@
+export { useMaterialCategories } from './hooks/use-material-categories';
+export { materialCategoryService } from './services/material-category-service';
+export { materialCategoryRepository } from './repository/material-category-repository';
+export { materialCategorySchema, materialCategoryFormSchema } from './schemas/material-category-schema';
+export type { MaterialCategory } from './types';
+export { MaterialCategoryTable } from './components/MaterialCategoryTable';
+export { MaterialCategoryForm } from './components/MaterialCategoryForm';
+export { MaterialCategoryBadge } from './components/MaterialCategoryBadge';
+export { MaterialCategoryStatsCards } from './components/MaterialCategoryStatsCards';
+
+export { useMaterials } from './hooks/use-materials';
+export { useMaterial } from './hooks/use-material';
+export { materialService } from './services/material-service';
+export { materialRepository } from './repository/material-repository';
+export { materialSchema, materialFormSchema, unitOfMeasureSchema, UNIT_LABELS } from './schemas/material-schema';
+export type { Material, UnitOfMeasure } from './types';
+export { MaterialTable } from './components/MaterialTable';
+export { MaterialForm } from './components/MaterialForm';
+export { MaterialBadge } from './components/MaterialBadge';
+export { MaterialStatsCards } from './components/MaterialStatsCards';

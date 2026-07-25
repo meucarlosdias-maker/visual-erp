@@ -1,0 +1,1867 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UnitOfMeasure {
+  UN
+  M2
+  M
+  CM
+  MM
+  KG
+  G
+  L
+  ML
+  ROLO
+  CHAPA
+  CAIXA
+  PACOTE
+  KIT
+}
+
+enum ComponentType {
+  MATERIAL
+  SERVICE
+  LABOR
+  EQUIPMENT
+  OUTSOURCED
+  TRANSPORT
+  TAX
+  FINISHING
+  CUSTOM
+}
+
+enum TeamRole {
+  LEADER
+  INSTALLER
+  ASSISTANT
+  WELDER
+  PAINTER
+  DESIGNER
+  PRINTER_OPERATOR
+  FINISHING
+  CUSTOM
+}
+
+enum EquipmentCostType {
+  HOUR
+  DAY
+  KM
+  UNIT
+  MONTH
+}
+
+enum QuotationStatus {
+  DRAFT
+  PENDING
+  SENT
+  APPROVED
+  REJECTED
+  EXPIRED
+  CANCELLED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  VALUE
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  TEAM_MEMBER
+  VIEWER
+}
+
+enum ProjectStatus {
+  WAITING
+  PLANNING
+  IN_PRODUCTION
+  WAITING_INSTALLATION
+  INSTALLING
+  FINISHED
+  DELIVERED
+  CANCELLED
+}
+
+enum TaskStatus {
+  PENDING
+  WAITING
+  IN_PROGRESS
+  PAUSED
+  FINISHED
+  CANCELLED
+}
+
+model Company {
+  id        String    @id @default(uuid())
+  isActive  Boolean   @default(true)
+
+  // Dados Gerais
+  razaoSocial       String
+  nomeFantasia      String
+  cnpj              String   @unique
+  inscricaoEstadual String?
+  inscricaoMunicipal String?
+
+  // Contatos
+  telefone  String?
+  celular   String?
+  email     String?
+  site      String?
+  whatsapp  String?
+
+  // Endereço
+  cep         String?
+  logradouro  String?
+  numero      String?
+  complemento String?
+  bairro      String?
+  cidade      String?
+  estado      String?
+  pais        String   @default("Brasil")
+
+  // Identidade Visual
+  logoUrl      String?
+  faviconUrl   String?
+  corPrimaria  String   @default("#3b82f6")
+  corSecundaria String  @default("#1e40af")
+
+  // Dados Bancários
+  banco     String?
+  agencia   String?
+  conta     String?
+  pix       String?
+  favorecido String?
+
+  // Funcionamento
+  horarioInicio  String   @default("08:00")
+  horarioFim     String   @default("18:00")
+  trabalhaSabado Boolean  @default(true)
+  trabalhaDomingo Boolean @default(false)
+
+  // Configurações
+  moeda       String   @default("BRL")
+  idioma      String   @default("pt-BR")
+  timezone    String   @default("America/Sao_Paulo")
+  formatoData String   @default("DD/MM/YYYY")
+
+  // Multi-Tenant
+  status     String   @default("active")
+  planId     String?
+  plan       Plan?    @relation(fields: [planId], references: [id])
+  settings   Json?
+  subscription Subscription?
+
+  // Auditoria
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  users              User[]
+  companySettings    CompanySettings[]
+  clients            Client[]
+  projects           Project[]
+  departments        Department[]
+  templates          Template[]
+  serviceCategories     ServiceCategory[]
+  serviceSubcategories  ServiceSubcategory[]
+  services              CatalogService[]
+  materialCategories    MaterialCategory[]
+  materials             Material[]
+  teams                 Team[]
+  teamMembers           TeamMember[]
+  equipmentCategories   EquipmentCategory[]
+  equipments            Equipment[]
+  quotations            Quotation[]
+  productionOrders      ProductionOrder[]
+  teamProductivities    TeamProductivity[]
+  workflows             Workflow[]
+  aiProviders           AiProvider[]
+  aiPrompts             AiPrompt[]
+  aiConversations       AiConversation[]
+  knowledgeCollections  KnowledgeCollection[]
+  plugins               Plugin[]
+
+  @@map("companies")
+}
+
+model Client {
+  id        String    @id @default(uuid())
+  name      String
+  document  String?
+  email     String?
+  phone     String?
+  address   String?
+  city      String?
+  state     String?
+  zipCode   String?
+  notes     String?
+  companyId String
+  company   Company   @relation(fields: [companyId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([name])
+  @@map("clients")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  companyId      String
+  company        Company   @relation(fields: [companyId], references: [id])
+
+  nome           String
+  sobrenome      String
+  email          String    @unique
+  telefone       String?
+  cargo          String?
+
+  role           UserRole  @default(TEAM_MEMBER)
+  roleId         String?
+  status         String    @default("active")
+  ultimoLogin    DateTime?
+  emailVerificado Boolean  @default(false)
+
+  avatarUrl      String?
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  createdBy      String?
+  updatedBy      String?
+  deletedBy      String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id])
+  name        String
+  description String?
+  color       String   @default("#3b82f6")
+  icon        String   @default("Building2")
+  sortOrder   Int      @default(0)
+  active      Boolean  @default(true)
+
+  projectTasks     ProjectTask[]
+  productionOrders ProductionOrder[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@map("departments")
+}
+
+model Project {
+  id                String        @id @default(uuid())
+  companyId         String
+  company           Company       @relation(fields: [companyId], references: [id])
+  quotationId       String?
+  clientId          String?
+  number            String        @unique
+  name              String
+  description       String?
+  status            ProjectStatus @default(WAITING)
+  priority          String        @default("normal")
+  expectedStartDate DateTime?
+  expectedEndDate   DateTime?
+  actualStartDate   DateTime?
+  actualEndDate     DateTime?
+  notes             String?
+
+  tasks            ProjectTask[]
+  productionOrders ProductionOrder[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([clientId])
+  @@index([status])
+  @@map("projects")
+}
+
+model ProjectTask {
+  id                String           @id @default(uuid())
+  projectId         String
+  project           Project          @relation(fields: [projectId], references: [id])
+  departmentId      String?
+  department        Department?      @relation(fields: [departmentId], references: [id])
+  title             String
+  description       String?
+  sequence          Int              @default(0)
+  status            TaskStatus       @default(PENDING)
+  estimatedHours    Float?
+  actualHours       Float?
+  assignedTeamId    String?
+  dependsOnTaskId   String?
+  startedAt         DateTime?
+  finishedAt        DateTime?
+  productionOrders  ProductionOrder[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([projectId])
+  @@index([departmentId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("project_tasks")
+}
+
+model ProductionOrder {
+  id              String   @id @default(uuid())
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id])
+  projectId       String
+  project         Project  @relation(fields: [projectId], references: [id])
+  projectTaskId   String?
+  projectTask     ProjectTask? @relation(fields: [projectTaskId], references: [id])
+  departmentId    String?
+  department      Department? @relation(fields: [departmentId], references: [id])
+  number          String   @unique
+  title           String
+  description     String?
+  status          String   @default("pending")
+  priority        String   @default("normal")
+  assignedTeamId  String?
+  estimatedHours  Float?
+  actualHours     Float?
+  startedAt       DateTime?
+  finishedAt      DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([projectId])
+  @@index([departmentId])
+  @@index([status])
+  @@map("production_orders")
+}
+
+model Template {
+  id        String    @id @default(uuid())
+  name      String
+  content   Json?
+  companyId String
+  company   Company   @relation(fields: [companyId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@map("templates")
+}
+
+model ServiceCategory {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  icon        String?
+  color       String?
+  sortOrder   Int       @default(0)
+  active      Boolean   @default(true)
+  companyId    String
+  company      Company         @relation(fields: [companyId], references: [id])
+  subcategories ServiceSubcategory[]
+  services     CatalogService[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([active])
+  @@map("service_categories")
+}
+
+model ServiceSubcategory {
+  id          String    @id @default(uuid())
+  categoryId  String
+  category    ServiceCategory @relation(fields: [categoryId], references: [id])
+  name        String
+  description String?
+  image       String?
+  sortOrder   Int       @default(0)
+  active      Boolean   @default(true)
+  companyId   String
+  company     Company   @relation(fields: [companyId], references: [id])
+  services    CatalogService[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([categoryId])
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([active])
+  @@map("service_subcategories")
+}
+
+model CatalogService {
+  id                   String          @id @default(uuid())
+  categoryId           String
+  category             ServiceCategory @relation(fields: [categoryId], references: [id])
+  subcategoryId        String?
+  subcategory          ServiceSubcategory? @relation(fields: [subcategoryId], references: [id])
+  code                 String          @unique
+  name                 String
+  description          String?
+  image                String?
+  version              String          @default("1.0.0")
+  averageProductionTime Float?
+  requiresVisit        Boolean         @default(false)
+  requiresApproval     Boolean         @default(false)
+  requiresArt          Boolean         @default(false)
+  hasPrinting          Boolean         @default(false)
+  hasInstallation      Boolean         @default(false)
+  hasPainting          Boolean         @default(false)
+  hasTransport         Boolean         @default(false)
+  defaultMargin        Float           @default(0)
+  minimumMargin        Float           @default(0)
+  maximumMargin        Float           @default(100)
+  commission           Float           @default(0)
+  tax                  Float           @default(0)
+  markup               Float           @default(0)
+  minimumCost          Float           @default(0)
+  active               Boolean         @default(true)
+  companyId            String
+  company              Company         @relation(fields: [companyId], references: [id])
+  components           ServiceComponent[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([categoryId])
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([active])
+  @@index([name])
+  @@map("catalog_services")
+}
+
+model ServiceComponent {
+  id            String        @id @default(uuid())
+  serviceId     String
+  service       CatalogService @relation(fields: [serviceId], references: [id])
+  name          String
+  description   String?
+  componentType ComponentType @default(MATERIAL)
+  required      Boolean       @default(true)
+  sequence      Int           @default(0)
+  active        Boolean       @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([serviceId])
+  @@index([deletedAt])
+  @@index([active])
+  @@map("service_components")
+}
+
+model MaterialCategory {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  color       String?
+  icon        String?
+  sortOrder   Int       @default(0)
+  active      Boolean   @default(true)
+  companyId   String
+  company     Company   @relation(fields: [companyId], references: [id])
+  materials   Material[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@map("material_categories")
+}
+
+model Material {
+  id             String         @id @default(uuid())
+  categoryId     String
+  category       MaterialCategory @relation(fields: [categoryId], references: [id])
+  code           String         @unique
+  name           String
+  description    String?
+  brand          String?
+  manufacturer   String?
+  supplier       String?
+  unit           UnitOfMeasure  @default(UN)
+  cost           Float          @default(0)
+  salePrice      Float          @default(0)
+  lossPercent    Float          @default(0)
+  minimumStock   Int            @default(0)
+  currentStock   Int            @default(0)
+  weight         Float?
+  width          Float?
+  height         Float?
+  thickness      Float?
+  color          String?
+  reference      String?
+  barcode        String?
+  notes          String?
+  active         Boolean        @default(true)
+  companyId      String
+  company        Company        @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([categoryId])
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([name])
+  @@index([active])
+  @@map("materials")
+}
+
+model Team {
+  id           String    @id @default(uuid())
+  companyId    String
+  company      Company   @relation(fields: [companyId], references: [id])
+  code         String    @unique
+  name         String
+  description  String?
+  hourCost     Float     @default(0)
+  dailyCost    Float     @default(0)
+  defaultMargin Float    @default(0)
+  active       Boolean   @default(true)
+  members      TeamMember[]
+  productivity TeamProductivity[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String    @id @default(uuid())
+  companyId String
+  company   Company   @relation(fields: [companyId], references: [id])
+  teamId    String?
+  team      Team?     @relation(fields: [teamId], references: [id])
+  name      String
+  role      TeamRole?
+  hourCost  Float     @default(0)
+  active    Boolean   @default(true)
+
+  @@index([companyId])
+  @@index([teamId])
+  @@index([active])
+  @@map("team_members")
+}
+
+model TeamProductivity {
+  id                  String  @id @default(uuid())
+  companyId           String
+  company             Company @relation(fields: [companyId], references: [id])
+  teamId              String
+  team                Team    @relation(fields: [teamId], references: [id])
+  serviceType         String
+  unit                String?
+  productionPerHour   Float   @default(0)
+  installationPerHour Float   @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([companyId])
+  @@index([teamId])
+  @@map("team_productivity")
+}
+
+model EquipmentCategory {
+  id        String    @id @default(uuid())
+  companyId String
+  company   Company   @relation(fields: [companyId], references: [id])
+  name      String
+  description String?
+  icon      String?
+  color     String?
+  sortOrder Int       @default(0)
+  active    Boolean   @default(true)
+  equipments Equipment[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@map("equipment_categories")
+}
+
+model Equipment {
+  id              String            @id @default(uuid())
+  companyId       String
+  company         Company           @relation(fields: [companyId], references: [id])
+  categoryId      String
+  category        EquipmentCategory @relation(fields: [categoryId], references: [id])
+  costType        EquipmentCostType @default(HOUR)
+  code            String            @unique
+  name            String
+  description     String?
+  brand           String?
+  model           String?
+  serialNumber    String?
+  patrimonyNumber String?
+  supplier        String?
+  purchaseDate    DateTime?
+  purchaseValue   Float     @default(0)
+  residualValue   Float     @default(0)
+  hourCost        Float     @default(0)
+  dailyCost       Float     @default(0)
+  kmCost          Float     @default(0)
+  monthlyCost     Float     @default(0)
+  fuelConsumption Float?
+  capacity        Float?
+  unit            String?
+  notes           String?
+  active          Boolean   @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([categoryId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([active])
+  @@map("equipments")
+}
+
+model Quotation {
+  id            String          @id @default(uuid())
+  companyId     String
+  company       Company         @relation(fields: [companyId], references: [id])
+  clientId      String?
+  number        String          @unique
+  version       Int             @default(1)
+  status        QuotationStatus @default(DRAFT)
+  title         String
+  description   String?
+  validUntil    DateTime?
+  subtotal      Float           @default(0)
+  discount      Float           @default(0)
+  discountType  DiscountType?
+  total         Float           @default(0)
+  notes         String?
+  internalNotes String?
+
+  items QuotationItem[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([clientId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([status])
+  @@index([createdAt])
+  @@map("quotations")
+}
+
+model QuotationItem {
+  id               String   @id @default(uuid())
+  quotationId      String
+  quotation        Quotation @relation(fields: [quotationId], references: [id])
+  serviceId        String?
+  description      String
+  quantity         Float    @default(1)
+  unit             String   @default("UN")
+  unitPrice        Float    @default(0)
+  totalPrice       Float    @default(0)
+  pricingSnapshot  Json?
+  sortOrder        Int      @default(0)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([quotationId])
+  @@index([deletedAt])
+  @@map("quotation_items")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  action     String
+  entityType String
+  entityId   String
+  changes    Json?
+  metadata   Json?
+  userId     String?
+  companyId  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  createdBy  String?
+  updatedBy  String?
+  deletedBy  String?
+
+  @@index([companyId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@map("audit_logs")
+}
+
+model ApiKey {
+  id          String    @id @default(uuid())
+  companyId   String
+  name        String
+  key         String    @unique
+  secret      String
+  permissions String[]
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+
+  @@index([companyId])
+  @@index([key])
+  @@index([active])
+  @@index([companyId, active])
+  @@map("api_keys")
+}
+
+model Webhook {
+  id         String   @id @default(uuid())
+  companyId  String
+  name       String
+  url        String
+  events     String[]
+  secret     String
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  createdBy  String?
+  updatedBy  String?
+  deletedBy  String?
+
+  @@index([companyId])
+  @@index([active])
+  @@index([companyId, active])
+  @@map("webhooks")
+}
+
+model WebhookLog {
+  id             String    @id @default(uuid())
+  webhookId      String
+  event          String
+  payload        Json
+  responseStatus Int?
+  responseBody   String?
+  attempts       Int       @default(1)
+  executedAt     DateTime  @default(now())
+
+  @@index([webhookId])
+  @@index([event])
+  @@index([executedAt])
+  @@map("webhook_logs")
+}
+
+model ApiLog {
+  id           String   @id @default(uuid())
+  apiKeyId     String
+  endpoint     String
+  method       String
+  statusCode   Int
+  responseTime Int
+  ip           String?
+  createdAt    DateTime @default(now())
+
+  @@index([apiKeyId])
+  @@index([endpoint])
+  @@index([createdAt])
+  @@map("api_logs")
+}
+
+enum WorkflowTrigger {
+  CLIENT_CREATED
+  LEAD_CREATED
+  LEAD_CONVERTED
+  QUOTE_APPROVED
+  PROJECT_CREATED
+  WORKORDER_CREATED
+  PRODUCTION_FINISHED
+  INSTALLATION_FINISHED
+  FINANCIAL_RECEIVED
+  FINANCIAL_PAID
+  USER_CREATED
+}
+
+enum WorkflowExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model Workflow {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  name        String
+  description String?
+  active      Boolean  @default(true)
+  trigger     WorkflowTrigger
+
+  steps      WorkflowStep[]
+  executions WorkflowExecution[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([trigger])
+  @@index([active])
+  @@map("workflows")
+}
+
+model WorkflowStep {
+  id            String   @id @default(uuid())
+  workflowId    String
+  workflow      Workflow @relation(fields: [workflowId], references: [id])
+  order         Int
+  type          String
+  configuration Json
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([workflowId])
+  @@index([deletedAt])
+  @@map("workflow_steps")
+}
+
+model WorkflowExecution {
+  id         String                  @id @default(uuid())
+  workflowId String
+  workflow   Workflow                @relation(fields: [workflowId], references: [id])
+  status     WorkflowExecutionStatus @default(PENDING)
+  startedAt  DateTime?
+  finishedAt DateTime?
+  duration   Int?
+  error      String?
+
+  logs WorkflowExecutionLog[]
+
+  @@index([workflowId])
+  @@index([status])
+  @@index([startedAt])
+  @@map("workflow_executions")
+}
+
+model WorkflowExecutionLog {
+  id          String   @id @default(uuid())
+  executionId String
+  execution   WorkflowExecution @relation(fields: [executionId], references: [id])
+  step        String
+  status      String
+  message     String?
+  createdAt   DateTime @default(now())
+
+  @@index([executionId])
+  @@map("workflow_execution_logs")
+}
+
+model AiProvider {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  name        String
+  provider    String
+  model       String
+  apiKey      String
+  temperature Float    @default(0.7)
+  maxTokens   Int      @default(2048)
+  active      Boolean  @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([active])
+  @@map("ai_providers")
+}
+
+model AiPrompt {
+  id           String   @id @default(uuid())
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id])
+  name         String
+  module       String
+  version      Int      @default(1)
+  prompt       String
+  systemPrompt String?
+  active       Boolean  @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([module])
+  @@index([active])
+  @@map("ai_prompts")
+}
+
+model AiConversation {
+  id        String   @id @default(uuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  userId    String?
+  title     String
+  module    String?
+
+  messages AiMessage[]
+  executions AiExecution[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([module])
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id             String   @id @default(uuid())
+  conversationId String
+  conversation   AiConversation @relation(fields: [conversationId], references: [id])
+  role           String
+  content        String
+  tokens         Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId])
+  @@map("ai_messages")
+}
+
+model AiExecution {
+  id             String   @id @default(uuid())
+  conversationId String?
+  conversation   AiConversation? @relation(fields: [conversationId], references: [id])
+  provider       String
+  model          String
+  tokensInput    Int      @default(0)
+  tokensOutput   Int      @default(0)
+  cost           Float    @default(0)
+  duration       Int      @default(0)
+  status         String   @default("completed")
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId])
+  @@map("ai_executions")
+}
+
+model KnowledgeCollection {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  name        String
+  description String?
+  active      Boolean  @default(true)
+
+  documents KnowledgeDocument[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([active])
+  @@map("knowledge_collections")
+}
+
+model KnowledgeDocument {
+  id           String   @id @default(uuid())
+  collectionId String
+  collection   KnowledgeCollection @relation(fields: [collectionId], references: [id])
+  title        String
+  fileName     String
+  fileType     String
+  fileSize     Int      @default(0)
+  source       String   @default("upload")
+  status       String   @default("pending")
+
+  chunks KnowledgeChunk[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([collectionId])
+  @@index([deletedAt])
+  @@index([collectionId, deletedAt])
+  @@index([status])
+  @@map("knowledge_documents")
+}
+
+model KnowledgeChunk {
+  id          String   @id @default(uuid())
+  documentId  String
+  document    KnowledgeDocument @relation(fields: [documentId], references: [id])
+  chunkIndex  Int
+  content     String
+  embeddingId String?
+  tokens      Int      @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([documentId])
+  @@index([documentId, chunkIndex])
+  @@map("knowledge_chunks")
+}
+
+model KnowledgeSearch {
+  id            String   @id @default(uuid())
+  userId        String?
+  query         String
+  results       Int      @default(0)
+  executionTime Int      @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("knowledge_searches")
+}
+
+model Plugin {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  name        String
+  slug        String   @unique
+  version     String   @default("1.0.0")
+  author      String?
+  description String?
+  category    String   @default("other")
+  manifest    Json?
+  enabled     Boolean  @default(true)
+
+  settings    PluginSetting[]
+  permissions PluginPermission[]
+  executions  PluginExecution[]
+
+  installedAt DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  createdBy   String?
+  updatedBy   String?
+  deletedBy   String?
+
+  @@index([companyId])
+  @@index([slug])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([enabled])
+  @@index([category])
+  @@map("plugins")
+}
+
+model PluginSetting {
+  id       String @id @default(uuid())
+  pluginId String
+  plugin   Plugin @relation(fields: [pluginId], references: [id])
+  key      String
+  value    String
+
+  @@index([pluginId])
+  @@index([pluginId, key])
+  @@map("plugin_settings")
+}
+
+model PluginPermission {
+  id         String @id @default(uuid())
+  pluginId   String
+  plugin     Plugin @relation(fields: [pluginId], references: [id])
+  permission String
+
+  @@index([pluginId])
+  @@map("plugin_permissions")
+}
+
+model PluginExecution {
+  id        String   @id @default(uuid())
+  pluginId  String
+  plugin    Plugin   @relation(fields: [pluginId], references: [id])
+  event     String
+  status    String   @default("pending")
+  duration  Int?
+  error     String?
+
+  createdAt DateTime @default(now())
+
+  @@index([pluginId])
+  @@index([event])
+  @@index([status])
+  @@index([createdAt])
+  @@map("plugin_executions")
+}
+
+model Plan {
+  id                 String         @id @default(uuid())
+  name               String
+  description        String?
+  price              Float          @default(0)
+  currency           String         @default("BRL")
+  interval           String         @default("monthly")
+  usersLimit         Int            @default(5)
+  storageLimit       Int            @default(1024)
+  activeProjectsLimit Int           @default(10)
+  clientsLimit       Int            @default(50)
+  integrationsLimit  Int            @default(3)
+  aiLimit            Boolean        @default(false)
+  pluginsLimit       Int            @default(0)
+  features           Json?
+  active             Boolean        @default(true)
+  sortOrder          Int            @default(0)
+
+  companies Company[]
+  subscriptions Subscription[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([active])
+  @@index([sortOrder])
+  @@map("plans")
+}
+
+model Subscription {
+  id          String   @id @default(uuid())
+  companyId   String   @unique
+  company     Company  @relation(fields: [companyId], references: [id])
+  planId      String
+  plan        Plan     @relation(fields: [planId], references: [id])
+  status      String   @default("active")
+  startedAt   DateTime @default(now())
+  expiresAt   DateTime?
+  renewalDate DateTime?
+  cancelledAt DateTime?
+  paymentMethod String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([companyId])
+  @@index([planId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("subscriptions")
+}
+
+model CompanySettings {
+  id        String   @id @default(uuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+
+  theme         String  @default("light")
+  primaryColor  String  @default("#3b82f6")
+  logoDarkUrl   String?
+  logoLightUrl  String?
+  faviconUrl    String?
+  preferences   Json?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([companyId])
+  @@map("company_settings")
+}
+
+model Dashboard {
+  id          String   @id @default(uuid())
+  companyId   String
+  name        String
+  description String?
+  layout      Json?
+  active      Boolean  @default(true)
+
+  widgets DashboardWidget[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([active])
+  @@map("dashboards")
+}
+
+model DashboardWidget {
+  id            String   @id @default(uuid())
+  dashboardId   String
+  dashboard     Dashboard @relation(fields: [dashboardId], references: [id])
+  type          String
+  title         String
+  configuration Json?
+  position      Json?
+  width         Int      @default(4)
+  height        Int      @default(3)
+
+  createdAt DateTime @default(now())
+
+  @@index([dashboardId])
+  @@map("dashboard_widgets")
+}
+
+model SavedReport {
+  id          String   @id @default(uuid())
+  companyId   String
+  name        String
+  description String?
+  module      String?
+  filters     Json?
+  columns     Json?
+  sortBy      String?
+  sortOrder   String   @default("asc")
+  chartType   String?
+  shared      Boolean  @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([module])
+  @@map("saved_reports")
+}
+
+model MetricSnapshot {
+  id            String   @id @default(uuid())
+  companyId     String
+  metric        String
+  value         Float
+  label         String?
+  category      String?
+  unit          String?
+  referenceDate DateTime
+  metadata      Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([companyId])
+  @@index([metric])
+  @@index([referenceDate])
+  @@index([companyId, metric, referenceDate])
+  @@map("metric_snapshots")
+}
+
+model CustomEntity {
+  id          String   @id @default(uuid())
+  companyId   String
+  name        String
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String   @default("#3b82f6")
+  active      Boolean  @default(true)
+
+  fields  CustomField[]
+  layouts CustomLayout[]
+  records CustomRecord[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([slug])
+  @@index([active])
+  @@map("custom_entities")
+}
+
+model CustomField {
+  id                String   @id @default(uuid())
+  entityId          String
+  entity            CustomEntity @relation(fields: [entityId], references: [id])
+  name              String
+  label             String
+  type              String
+  required          Boolean  @default(false)
+  defaultValue      String?
+  options           Json?
+  placeholder       String?
+  helpText          String?
+  order             Int      @default(0)
+  active            Boolean  @default(true)
+  validations       Json?
+  relationEntityId  String?
+  relationField     String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([entityId])
+  @@index([deletedAt])
+  @@index([entityId, deletedAt])
+  @@index([entityId, order])
+  @@map("custom_fields")
+}
+
+model CustomLayout {
+  id        String   @id @default(uuid())
+  entityId  String
+  entity    CustomEntity @relation(fields: [entityId], references: [id])
+  name      String
+  layout    Json
+  version   Int      @default(1)
+  active    Boolean  @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([entityId])
+  @@index([deletedAt])
+  @@index([entityId, deletedAt])
+  @@index([entityId, active])
+  @@map("custom_layouts")
+}
+
+model CustomRecord {
+  id        String   @id @default(uuid())
+  entityId  String
+  entity    CustomEntity @relation(fields: [entityId], references: [id])
+  data      Json
+  createdBy String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([entityId])
+  @@index([deletedAt])
+  @@index([entityId, deletedAt])
+  @@index([createdBy])
+  @@map("custom_records")
+}
+
+model Conversation {
+  id            String    @id @default(uuid())
+  companyId     String
+  channel       String
+  customerId    String?
+  customerName  String?
+  assignedUserId String?
+  status        String    @default("active")
+  lastMessageAt DateTime?
+  metadata      Json?
+
+  messages Message[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([status])
+  @@index([assignedUserId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  direction      String
+  sender         String?
+  content        String
+  attachments    Json?
+  status         String   @default("sent")
+  channel        String?
+  metadata       Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  companyId String
+  userId    String?
+  title     String
+  message   String
+  type      String   @default("system")
+  read      Boolean  @default(false)
+  link      String?
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([read])
+  @@index([type])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model MessageTemplate {
+  id          String   @id @default(uuid())
+  companyId   String
+  name        String
+  category    String   @default("general")
+  content     String
+  variables   Json?
+  active      Boolean  @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([category])
+  @@index([active])
+  @@map("message_templates")
+}
+
+model Job {
+  id          String    @id @default(uuid())
+  companyId   String
+  name        String
+  type        String
+  payload     Json?
+  priority    String    @default("NORMAL")
+  status      String    @default("pending")
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(1)
+  scheduledAt DateTime?
+  startedAt   DateTime?
+  finishedAt  DateTime?
+
+  executions JobExecution[]
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([status])
+  @@index([priority])
+  @@map("jobs")
+}
+
+model JobExecution {
+  id        String   @id @default(uuid())
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id])
+  worker    String
+  duration  Int?
+  status    String
+  error     String?
+  logs      Json?
+  createdAt DateTime @default(now())
+
+  @@index([jobId])
+  @@index([status])
+  @@map("job_executions")
+}
+
+model ScheduledJob {
+  id             String    @id @default(uuid())
+  companyId      String
+  name           String
+  cron           String?
+  active         Boolean   @default(true)
+  config         Json?
+  lastExecution  DateTime?
+  nextExecution  DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
+  @@index([companyId, deletedAt])
+  @@index([active])
+  @@map("scheduled_jobs")
+}
+
+model EventLog {
+  id        String   @id @default(uuid())
+  companyId String
+  event     String
+  payload   Json?
+  publisher String
+  status    String   @default("processed")
+  createdAt DateTime @default(now())
+
+  @@index([companyId])
+  @@index([event])
+  @@index([createdAt])
+  @@map("event_logs")
+}
+
+model AuditEvent {
+  id        String   @id @default(uuid())
+  companyId String
+  userId    String?
+  entity    String
+  entityId  String?
+  action    String
+  oldValues Json?
+  newValues Json?
+  ip        String?
+  userAgent String?
+  sessionId String?
+  createdAt DateTime @default(now())
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([entity])
+  @@index([action])
+  @@index([createdAt])
+  @@index([companyId, createdAt])
+  @@map("audit_events")
+}
+
+model SecurityPolicy {
+  id          String   @id @default(uuid())
+  companyId   String
+  name        String
+  description String?
+  rules       Json?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([active])
+  @@map("security_policies")
+}
+
+model AccessLog {
+  id        String   @id @default(uuid())
+  companyId String
+  userId    String?
+  action    String
+  resource  String
+  status    String
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([status])
+  @@index([createdAt])
+  @@map("access_logs")
+}
+
+model DataRetentionPolicy {
+  id             String   @id @default(uuid())
+  companyId      String
+  entity         String
+  retentionDays  Int
+  archiveAfter   Int?
+  deleteAfter    Int?
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([entity])
+  @@index([active])
+  @@map("data_retention_policies")
+}
+
+model PlatformUser {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  role      String    @default("admin")
+  active    Boolean   @default(true)
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([email])
+  @@index([active])
+  @@index([role])
+  @@map("platform_users")
+}
+
+model License {
+  id          String   @id @default(uuid())
+  companyId   String
+  planId      String
+  status      String   @default("active")
+  expiresAt   DateTime?
+  maxUsers    Int      @default(10)
+  maxStorage  Int      @default(1024)
+  features    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([status])
+  @@index([planId])
+  @@map("licenses")
+}
+
+model PlatformMetric {
+  id            String   @id @default(uuid())
+  metric        String
+  value         Float
+  referenceDate DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  @@index([metric])
+  @@index([referenceDate])
+  @@map("platform_metrics")
+}
+
+model PlatformAnnouncement {
+  id        String    @id @default(uuid())
+  title     String
+  message   String
+  type      String    @default("info")
+  startsAt  DateTime?
+  endsAt    DateTime?
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  @@index([type])
+  @@index([active])
+  @@index([startsAt])
+  @@map("platform_announcements")
+}
+
+model SystemLog {
+  id        String   @id @default(uuid())
+  companyId String?
+  level     String   @default("INFO")
+  source    String
+  message   String
+  context   Json?
+  createdAt DateTime @default(now())
+
+  @@index([companyId])
+  @@index([level])
+  @@index([source])
+  @@index([createdAt])
+  @@map("system_logs")
+}
+
+model HealthCheck {
+  id           String   @id @default(uuid())
+  service      String
+  status       String   @default("healthy")
+  responseTime Int?
+  checkedAt    DateTime @default(now())
+
+  @@index([service])
+  @@index([status])
+  @@index([checkedAt])
+  @@map("health_checks")
+}
+
+model Deployment {
+  id          String    @id @default(uuid())
+  version     String
+  environment String    @default("production")
+  status      String    @default("pending")
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  commit      String?
+  branch      String?
+  createdAt   DateTime  @default(now())
+
+  @@index([environment])
+  @@index([status])
+  @@index([createdAt])
+  @@map("deployments")
+}
+
+model Backup {
+  id         String    @id @default(uuid())
+  type       String    @default("manual")
+  status     String    @default("pending")
+  size       Int?
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@map("backups")
+}

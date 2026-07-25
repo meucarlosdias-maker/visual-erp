@@ -1,0 +1,16 @@
+export { installationService } from './services/installation-service';
+export { schedulingService } from './services/scheduling-service';
+export { deliveryService } from './services/delivery-service';
+export { installationRepository } from './repository/installation-repository';
+export { installationTeamRepository } from './repository/installation-team-repository';
+export { installationEquipmentRepository } from './repository/installation-equipment-repository';
+export { installationVehicleRepository } from './repository/installation-vehicle-repository';
+export { useInstallations } from './hooks/use-installations';
+export { useInstallation } from './hooks/use-installation';
+export { installationSchema, installationFormSchema, installationStatusSchema } from './schemas';
+export type { Installation, InstallationTeam, InstallationEquipment, InstallationVehicle, InstallationStatus } from './types';
+export { INSTALLATION_STATUS_LABELS, INSTALLATION_STATUS_COLORS } from './validators';
+export { InstallationAgenda } from './components/InstallationAgenda';
+export { InstallationBadge } from './components/InstallationBadge';
+export { InstallationDetail } from './components/InstallationDetail';
+export { InstallationForm } from './components/InstallationForm';
