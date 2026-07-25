@@ -1,6 +1,6 @@
-import { mainNavigation } from './navigation';
+import { companyNavigation } from './company-navigation';
 
-export const sidebarMenu = mainNavigation;
+export const sidebarMenu = companyNavigation;
 
 export const userMenuItems = [
   { label: 'Perfil', href: '/app/configuracoes' },

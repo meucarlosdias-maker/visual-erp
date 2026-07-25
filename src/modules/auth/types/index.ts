@@ -9,4 +9,5 @@ export interface AuthUser {
   name?: string;
   avatarUrl?: string;
   role?: string;
+  type?: 'platform' | 'company';
 }

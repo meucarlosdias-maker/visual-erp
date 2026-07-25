@@ -79,7 +79,7 @@ import {
 import { Messages } from '@/constants/messages';
 import { Permissions } from '@/constants/permissions';
 import { formatCurrency, formatDate, formatPhone, generateSlug, sleep } from '@/utils/helpers';
-import { RoleLabels } from '@/constants/roles';
+import { CompanyRoleLabels } from '@/constants/roles';
 import { StatusLabels, StatusColors } from '@/constants/status';
 import { Colors } from '@/constants/colors';
 import { type ColumnDef } from '@tanstack/react-table';
@@ -468,9 +468,9 @@ export default function SystemComponentsPage() {
               </CardContent>
             </Card>
             <Card className="p-4">
-              <CardHeader className="p-0 pb-1"><CardTitle className="text-xs font-medium">RoleLabels</CardTitle></CardHeader>
+              <CardHeader className="p-0 pb-1"><CardTitle className="text-xs font-medium">CompanyRoleLabels</CardTitle></CardHeader>
               <CardContent className="p-0 text-sm space-y-1">
-                {Object.entries(RoleLabels).map(([k, v]) => (
+                {Object.entries(CompanyRoleLabels).map(([k, v]) => (
                   <p key={k} className="text-xs">{k}: {v}</p>
                 ))}
               </CardContent>

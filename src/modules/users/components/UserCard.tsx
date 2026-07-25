@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/feedback';
 import { UserStatusBadge } from './UserStatusBadge';
-import { RoleLabels } from '@/constants/roles';
+import { CompanyRoleLabels } from '@/constants/roles';
 import { Inbox, ShieldX, Phone } from '@/constants/icons';
 import type { User } from '../types';
 
@@ -41,7 +41,7 @@ export function UserCard({ user, loading }: UserCardProps) {
         </Avatar>
         <div className="min-w-0">
           <CardTitle className="text-sm truncate">{nomeCompleto}</CardTitle>
-          <p className="text-xs text-muted-foreground">{user.position || RoleLabels[user.role]}</p>
+          <p className="text-xs text-muted-foreground">{user.position || CompanyRoleLabels[user.role]}</p>
         </div>
       </CardHeader>
       <CardContent className="space-y-2 text-sm">
@@ -51,7 +51,7 @@ export function UserCard({ user, loading }: UserCardProps) {
         </div>
         <div className="flex items-center gap-2 text-muted-foreground">
           <ShieldX className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate">{RoleLabels[user.role]}</span>
+          <span className="truncate">{CompanyRoleLabels[user.role]}</span>
         </div>
         {user.telefone && (
           <div className="flex items-center gap-2 text-muted-foreground">

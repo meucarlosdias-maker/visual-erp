@@ -1,23 +1,24 @@
 'use client';
 
-import type { Permission } from '@/constants/permissions';
+import { getCompanyUserPermissions, getPlatformUserPermissions } from '@/lib/permissions';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
-import { getUserPermissions } from '@/lib/permissions';
 
 interface CanProps {
-  permission: Permission;
+  permission: string;
   fallback?: React.ReactNode;
   children: React.ReactNode;
 }
 
 export function Can({ permission, fallback, children }: CanProps) {
   const { user } = useAuth();
-  const permissions = getUserPermissions(user?.role);
-  const hasPermission = permissions.includes('*') || permissions.includes(permission);
+  if (!user) return fallback ?? null;
 
-  if (!hasPermission) {
-    return fallback ?? null;
-  }
+  const permissions = user.type === 'platform'
+    ? getPlatformUserPermissions(user.role)
+    : getCompanyUserPermissions(user.role);
 
+  const hasAccess = permissions.includes('*') || permissions.includes(permission);
+
+  if (!hasAccess) return fallback ?? null;
   return <>{children}</>;
 }

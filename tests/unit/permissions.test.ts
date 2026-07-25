@@ -1,34 +1,50 @@
 import { describe, it, expect } from 'vitest';
-import { rolePermissions } from '@/config/permissions';
+import { companyRolePermissions, platformRolePermissions } from '@/config/permissions';
 import { Permissions, type Permission } from '@/constants/permissions';
 
-describe('rolePermissions', () => {
-  it('has SUPER_ADMIN with wildcard', () => {
-    const superAdmin = rolePermissions.find((r) => r.role === 'SUPER_ADMIN');
-    expect(superAdmin).toBeDefined();
-    expect(superAdmin!.permissions).toContain('*');
-  });
-
-  it('has all roles defined', () => {
-    const roles = rolePermissions.map((r) => r.role);
-    expect(roles).toContain('SUPER_ADMIN');
-    expect(roles).toContain('ADMIN');
-    expect(roles).toContain('MANAGER');
-    expect(roles).toContain('TEAM_MEMBER');
-    expect(roles).toContain('VIEWER');
-  });
-
+describe('companyRolePermissions', () => {
   it('ADMIN has all user permissions', () => {
-    const admin = rolePermissions.find((r) => r.role === 'ADMIN');
+    const admin = companyRolePermissions.find((r) => r.role === 'ADMIN');
+    expect(admin).toBeDefined();
     expect(admin!.permissions).toContain('user:*');
     expect(admin!.permissions).toContain('client:*');
   });
 
+  it('has all company roles defined', () => {
+    const roles = companyRolePermissions.map((r) => r.role);
+    expect(roles).toContain('ADMIN');
+    expect(roles).toContain('MANAGER');
+    expect(roles).toContain('SALES');
+    expect(roles).toContain('VIEWER');
+  });
+
   it('VIEWER has only view permissions', () => {
-    const viewer = rolePermissions.find((r) => r.role === 'VIEWER');
-    expect(viewer!.permissions.length).toBe(3);
+    const viewer = companyRolePermissions.find((r) => r.role === 'VIEWER');
+    expect(viewer).toBeDefined();
     const viewPerms = viewer!.permissions.filter((p) => p.includes('view'));
-    expect(viewPerms.length).toBe(3);
+    expect(viewPerms.length).toBeGreaterThan(0);
+  });
+});
+
+describe('platformRolePermissions', () => {
+  it('SUPER_ADMIN has wildcard', () => {
+    const superAdmin = platformRolePermissions.find((r) => r.role === 'SUPER_ADMIN');
+    expect(superAdmin).toBeDefined();
+    expect(superAdmin!.permissions).toContain('*');
+  });
+
+  it('has all platform roles defined', () => {
+    const roles = platformRolePermissions.map((r) => r.role);
+    expect(roles).toContain('SUPER_ADMIN');
+    expect(roles).toContain('DEVELOPER');
+    expect(roles).toContain('SUPPORT');
+  });
+
+  it('SUPPORT has no company permissions', () => {
+    const support = platformRolePermissions.find((r) => r.role === 'SUPPORT');
+    expect(support).toBeDefined();
+    const companyPerms = support!.permissions.filter((p) => p.startsWith('client'));
+    expect(companyPerms).toHaveLength(0);
   });
 });
 

@@ -18,7 +18,7 @@ export default function NovoUsuarioPage() {
       email: data.email ?? '',
       telefone: data.telefone ?? '',
       position: data.position ?? '',
-      role: data.role ?? 'TEAM_MEMBER',
+      role: data.role ?? 'VIEWER',
       companyId: '00000000-0000-0000-0000-000000000000',
     });
     if (ok) {

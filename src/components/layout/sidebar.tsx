@@ -13,7 +13,6 @@ import {
 } from '@/constants/icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { sidebarMenu } from '@/config/menus';
 import type { NavItem } from '@/config/navigation';
 
 function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
@@ -84,7 +83,12 @@ function NavGroup({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
   );
 }
 
-export function Sidebar() {
+interface SidebarProps {
+  navigation: NavItem[];
+  logoHref?: string;
+}
+
+export function Sidebar({ navigation, logoHref = '/app' }: SidebarProps) {
   const { sidebarOpen, toggleSidebar } = useAppStore();
 
   return (
@@ -96,7 +100,7 @@ export function Sidebar() {
     >
       <div className="flex h-14 items-center justify-between px-4">
         {sidebarOpen && (
-          <Link href="/app" className="font-semibold text-sidebar-foreground">
+          <Link href={logoHref} className="font-semibold text-sidebar-foreground">
             Visual ERP
           </Link>
         )}
@@ -115,7 +119,7 @@ export function Sidebar() {
       </div>
       <Separator />
       <nav className="flex-1 space-y-1 p-2">
-        {sidebarMenu.map((item) => (
+        {navigation.map((item) => (
           <NavGroup key={item.label} item={item} collapsed={!sidebarOpen} />
         ))}
       </nav>

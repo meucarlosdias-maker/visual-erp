@@ -3,10 +3,13 @@ import { z } from 'zod/v4';
 const phoneRegex = /^\(\d{2}\) \d{4,5}-\d{4}$/;
 
 export const userRoleSchema = z.enum([
-  'SUPER_ADMIN',
   'ADMIN',
   'MANAGER',
-  'TEAM_MEMBER',
+  'SALES',
+  'DESIGNER',
+  'PRODUCTION',
+  'INSTALLER',
+  'FINANCE',
   'VIEWER',
 ]);
 
@@ -26,7 +29,7 @@ export const userSchema = z.object({
   telefone: z.string().regex(phoneRegex, 'Telefone inválido').or(z.literal('')).optional().default(''),
   position: z.string().optional().default(''),
 
-  role: userRoleSchema.default('TEAM_MEMBER'),
+  role: userRoleSchema.default('VIEWER'),
   roleId: z.string().nullable().optional().default(null),
   status: userStatusSchema.default('active'),
   lastLogin: z.instanceof(Date).nullable().optional().default(null),
@@ -50,7 +53,7 @@ export const userInviteSchema = z.object({
   email: z.string().email('E-mail inválido'),
   telefone: z.string().regex(phoneRegex, 'Telefone inválido').or(z.literal('')).optional().default(''),
   position: z.string().optional().default(''),
-  role: userRoleSchema.default('TEAM_MEMBER'),
+  role: userRoleSchema.default('VIEWER'),
   companyId: z.string(),
 });
 
@@ -81,7 +84,7 @@ export const inviteSchema = z.object({
   lastName: z.string().min(2, 'Sobrenome deve ter no mínimo 2 caracteres'),
   token: z.string(),
   status: inviteStatusSchema.default('pending'),
-  role: userRoleSchema.default('TEAM_MEMBER'),
+  role: userRoleSchema.default('VIEWER'),
   companyId: z.string(),
   createdAt: z.instanceof(Date).or(z.string().pipe(z.coerce.date())),
   expiresAt: z.instanceof(Date).or(z.string().pipe(z.coerce.date())),

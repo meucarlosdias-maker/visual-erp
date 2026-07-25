@@ -71,12 +71,23 @@ enum DiscountType {
   VALUE
 }
 
-enum UserRole {
-  SUPER_ADMIN
+enum CompanyRole {
   ADMIN
   MANAGER
-  TEAM_MEMBER
+  SALES
+  DESIGNER
+  PRODUCTION
+  INSTALLER
+  FINANCE
   VIEWER
+}
+
+enum PlatformRole {
+  SUPER_ADMIN
+  DEVELOPER
+  SUPPORT
+  FINANCE
+  COMMERCIAL
 }
 
 enum ProjectStatus {
@@ -233,7 +244,7 @@ model User {
   telefone       String?
   cargo          String?
 
-  role           UserRole  @default(TEAM_MEMBER)
+  role           CompanyRole  @default(VIEWER)
   roleId         String?
   status         String    @default("active")
   ultimoLogin    DateTime?
@@ -1744,14 +1755,14 @@ model DataRetentionPolicy {
 }
 
 model PlatformUser {
-  id        String    @id @default(uuid())
+  id        String       @id @default(uuid())
   name      String
-  email     String    @unique
-  role      String    @default("admin")
-  active    Boolean   @default(true)
+  email     String       @unique
+  role      PlatformRole @default(SUPER_ADMIN)
+  active    Boolean      @default(true)
   lastLogin DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   @@index([email])
   @@index([active])

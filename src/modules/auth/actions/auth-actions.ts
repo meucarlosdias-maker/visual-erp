@@ -13,9 +13,13 @@ export async function login(_prevState: { error: string } | undefined, formData:
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: error.message };
 
+  const userType = data.user?.user_metadata?.type as string | undefined;
+  if (userType === 'platform') {
+    redirect('/platform');
+  }
   redirect('/app');
 }
 

@@ -1,9 +1,20 @@
-export enum UserRole {
-  SUPER_ADMIN = 'SUPER_ADMIN',
+export enum CompanyRole {
   ADMIN = 'ADMIN',
   MANAGER = 'MANAGER',
-  TEAM_MEMBER = 'TEAM_MEMBER',
+  SALES = 'SALES',
+  DESIGNER = 'DESIGNER',
+  PRODUCTION = 'PRODUCTION',
+  INSTALLER = 'INSTALLER',
+  FINANCE = 'FINANCE',
   VIEWER = 'VIEWER',
+}
+
+export enum PlatformRole {
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  DEVELOPER = 'DEVELOPER',
+  SUPPORT = 'SUPPORT',
+  FINANCE = 'FINANCE',
+  COMMERCIAL = 'COMMERCIAL',
 }
 
 export enum ProjectStatus {

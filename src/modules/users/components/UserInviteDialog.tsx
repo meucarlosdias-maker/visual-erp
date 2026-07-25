@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { RoleLabels } from '@/constants/roles';
+import { CompanyRoleLabels } from '@/constants/roles';
 
 interface UserInviteDialogProps {
   open: boolean;
@@ -27,7 +27,7 @@ export function UserInviteDialog({ open, onOpenChange, onInvite }: UserInviteDia
   const [email, setEmail] = useState('');
   const [telefone, setTelefone] = useState('');
   const [position, setPosition] = useState('');
-  const [role, setRole] = useState('TEAM_MEMBER');
+  const [role, setRole] = useState('VIEWER');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -41,7 +41,7 @@ export function UserInviteDialog({ open, onOpenChange, onInvite }: UserInviteDia
       setEmail('');
       setTelefone('');
       setPosition('');
-      setRole('TEAM_MEMBER');
+      setRole('VIEWER');
     }
   };
 
@@ -114,7 +114,7 @@ export function UserInviteDialog({ open, onOpenChange, onInvite }: UserInviteDia
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {Object.entries(RoleLabels).map(([value, label]) => (
+              {Object.entries(CompanyRoleLabels).map(([value, label]) => (
                 <SelectItem key={value} value={value}>{label}</SelectItem>
               ))}
             </SelectContent>
