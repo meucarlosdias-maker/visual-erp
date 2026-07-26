@@ -4,5 +4,5 @@ export { createLicense, updateLicense, getLicense, getLicenseByCompany, listLice
 export { listPlans, getPlan, createPlan, updatePlan, deletePlan } from './billing';
 export { recordMetric, getMetric, getMetricsHistory, getAllLatestMetrics } from './monitoring';
 export { listCompanies, getCompany, createCompany, updateCompany, blockCompany, unblockCompany, getActiveCount, getBlockedCount } from './tenants';
-export { listPlatformUsers, getPlatformUser, createPlatformUser, updatePlatformUser, isSuperAdmin, hasPlatformAccess } from './administration';
+export { listPlatformUsers, getPlatformUser, getPlatformUserByEmail, createPlatformUser, updatePlatformUser, isSuperAdmin, hasPlatformAccess } from './administration';
 export { createAnnouncement, updateAnnouncement, deleteAnnouncement, getAnnouncement, listAnnouncements, getActiveAnnouncements } from './announcements';

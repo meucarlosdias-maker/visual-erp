@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { logger } from '@/lib/logger';
+import { getPlatformUserByEmail } from '@/core/platform';
 
 function addSecurityHeaders(response: NextResponse): void {
   response.headers.set('X-Content-Type-Options', 'nosniff');
@@ -65,7 +66,12 @@ export async function proxy(request: NextRequest) {
     return supabaseResponse;
   }
 
-  const userType = user.user_metadata?.type as string | undefined;
+  let userType = user.user_metadata?.type as string | undefined;
+
+  if (!userType) {
+    const email = user.email;
+    userType = (email && getPlatformUserByEmail(email)) ? 'platform' : 'company';
+  }
 
   if (user && pathname.startsWith('/auth/login')) {
     const url = request.nextUrl.clone();

@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 import { loginSchema, resetPasswordSchema, updatePasswordSchema } from '../schemas';
+import { getPlatformUserByEmail } from '@/core/platform';
 
 export async function login(_prevState: { error: string } | undefined, formData: FormData) {
   const parsed = loginSchema.safeParse({
@@ -17,9 +18,20 @@ export async function login(_prevState: { error: string } | undefined, formData:
   if (error) return { error: error.message };
 
   const userType = data.user?.user_metadata?.type as string | undefined;
+
   if (userType === 'platform') {
     redirect('/platform');
   }
+
+  const userEmail = data.user?.email;
+  if (userEmail) {
+    const platformUser = getPlatformUserByEmail(userEmail);
+    if (platformUser) {
+      await supabase.auth.updateUser({ data: { type: 'platform' } });
+      redirect('/platform');
+    }
+  }
+
   redirect('/app');
 }
 
