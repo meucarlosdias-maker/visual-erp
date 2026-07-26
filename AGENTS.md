@@ -50,3 +50,10 @@ Prioridade: segurança > navegação > bugs funcionais > perf/UX.
 - FIN-004: Importação de extrato bancário implementada (estrutura inicial)
 - API-003: API keys armazenadas com hash (bcrypt-like)
 - CRM-007: Atividades do lead carregando corretamente
+- MTN-001: Separação Platform/Company — Prisma schema, enums, roles, permissions, auth, middleware, layouts, sidebars, navegação
+- BUILD-001: `export const dynamic = 'force-dynamic'` no layout `/app` para resolver erro de prerender no Turbopack/webpack
+
+## Build & Test
+- `npm run build` — build local (usa Turbopack por padrão)
+- `npm test` — vitest (166 testes)
+- `npx vercel list` — verificar status do deploy na Vercel

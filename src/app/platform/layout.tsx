@@ -1,3 +1,5 @@
+'use client';
+
 import { PlatformSidebar } from '@/components/layout/platform-sidebar';
 import { Header } from '@/components/layout/header';
 
