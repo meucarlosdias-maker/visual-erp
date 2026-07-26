@@ -13,7 +13,7 @@ import {
 } from '@/constants/icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { NavItem } from '@/config/navigation';
+import type { NavItem } from '@/config/company-navigation';
 
 function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
   const pathname = usePathname();
